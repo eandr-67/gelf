@@ -112,7 +112,7 @@ func TestWriteSmallOneLine(t *testing.T) {
 		return
 	}
 
-	fileExpected := "/go-gelf/gelf/udpwriter_test.go"
+	fileExpected := "/gelf/udpwriter_test.go"
 	if !strings.HasSuffix(msg.Extra["_file"].(string), fileExpected) {
 		t.Errorf("msg.File: expected %s, got %s", fileExpected,
 			msg.Extra["_file"].(string))

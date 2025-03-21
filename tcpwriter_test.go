@@ -87,7 +87,7 @@ func TestWriteSmallOneLineTCP(t *testing.T) {
 
 	assertMessages(msg, msgDataTrunc, "", t)
 
-	fileExpected := "/go-gelf/gelf/tcpwriter_test.go"
+	fileExpected := "/gelf/tcpwriter_test.go"
 	if !strings.HasSuffix(msg.Extra["_file"].(string), fileExpected) {
 		t.Errorf("msg.File: expected %s, got %s", fileExpected,
 			msg.Extra["_file"].(string))
