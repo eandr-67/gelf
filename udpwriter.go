@@ -63,7 +63,7 @@ func numChunks(b []byte) int {
 // New returns a new GELF Writer.  This writer can be used to send the
 // output of the standard Go log functions to a central GELF server by
 // passing it to log.SetOutput()
-func NewUDPWriter(addr string) (Writer, error) {
+func NewUDPWriter(addr string) (*UDPWriter, error) {
 	var err error
 	w := new(UDPWriter)
 	w.CompressionLevel = flate.BestSpeed
@@ -194,10 +194,10 @@ func (w *UDPWriter) WriteMessage(m *Message) (err error) {
 			return
 		}
 		if _, err = zw.Write(mBytes); err != nil {
-			zw.Close()
+			_ = zw.Close()
 			return
 		}
-		zw.Close()
+		_ = zw.Close()
 		zBytes = zBuf.Bytes()
 	}
 

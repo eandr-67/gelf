@@ -20,7 +20,7 @@ type TCPWriter struct {
 	ReconnectDelay time.Duration
 }
 
-func NewTCPWriter(addr string) (Writer, error) {
+func NewTCPWriter(addr string) (*TCPWriter, error) {
 	var err error
 	w := new(TCPWriter)
 	w.MaxReconnect = DefaultMaxReconnect

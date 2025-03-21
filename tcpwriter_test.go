@@ -270,7 +270,7 @@ func sendAndRecvMsgTCP(msg *Message) (*Message, error) {
 		return nil, errors.New("Wrong signal received")
 	}
 
-	w.Close()
+	_ = w.Close()
 	message, err := r.readMessage()
 	if err != nil {
 		return nil, fmt.Errorf("r.readMessage: %s", err)
@@ -323,7 +323,7 @@ func sendAndRecv2MessagesWithDropTCP(msgData1 string, msgData2 string) (*Message
 		return nil, nil, fmt.Errorf("readmessage: %s", err)
 	}
 
-	w.Close()
+	_ = w.Close()
 	return message1, message2, nil
 }
 
@@ -357,6 +357,6 @@ func sendAndRecv2MessagesWithServerDropTCP(msgData1 string, msgData2 string) (*M
 		}
 	}
 
-	w.Close()
+	_ = w.Close()
 	return message1, nil
 }

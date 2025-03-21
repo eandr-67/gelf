@@ -11,7 +11,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"strings"
 	"testing"
 	"time"
@@ -35,13 +34,13 @@ func sendAndRecv(msgData string, compress CompressType) (*Message, error) {
 	if err != nil {
 		return nil, fmt.Errorf("NewUDPWriter: %s", err)
 	}
+	defer func() { _ = w.Close() }()
 	w.CompressionType = compress
 
 	if _, err = w.Write([]byte(msgData)); err != nil {
 		return nil, fmt.Errorf("w.Write: %s", err)
 	}
 
-	w.Close()
 	return r.ReadMessage()
 }
 
@@ -55,13 +54,14 @@ func sendAndRecvMsg(msg *Message, compress CompressType) (*Message, error) {
 	if err != nil {
 		return nil, fmt.Errorf("NewUDPWriter: %s", err)
 	}
+	defer func() { _ = w.Close() }()
+
 	w.CompressionType = compress
 
 	if err = w.WriteMessage(msg); err != nil {
 		return nil, fmt.Errorf("w.Write: %s", err)
 	}
 
-	w.Close()
 	return r.ReadMessage()
 }
 
@@ -241,7 +241,7 @@ func BenchmarkWriteBestSpeed(b *testing.B) {
 	if err != nil {
 		b.Fatalf("NewReader: %s", err)
 	}
-	go io.Copy(ioutil.Discard, r)
+	go func() { _, _ = io.Copy(io.Discard, r) }()
 	w, err := NewUDPWriter(r.Addr())
 	if err != nil {
 		b.Fatalf("NewUDPWriter: %s", err)
@@ -249,14 +249,14 @@ func BenchmarkWriteBestSpeed(b *testing.B) {
 	w.CompressionLevel = flate.BestSpeed
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		w.WriteMessage(&Message{
+		_ = w.WriteMessage(&Message{
 			Version:  "1.1",
 			Host:     w.hostname,
 			Short:    "short message",
 			Full:     "full message",
 			TimeUnix: float64(time.Now().UnixNano()) / float64(time.Second),
 			Level:    6, // info
-			Facility: w.Facility,
+			Facility: w.facility,
 			Extra:    map[string]interface{}{"_file": "1234", "_line": "3456"},
 		})
 	}
@@ -267,7 +267,7 @@ func BenchmarkWriteNoCompression(b *testing.B) {
 	if err != nil {
 		b.Fatalf("NewReader: %s", err)
 	}
-	go io.Copy(ioutil.Discard, r)
+	go func() { _, _ = io.Copy(io.Discard, r) }()
 	w, err := NewUDPWriter(r.Addr())
 	if err != nil {
 		b.Fatalf("NewUDPWriter: %s", err)
@@ -275,14 +275,14 @@ func BenchmarkWriteNoCompression(b *testing.B) {
 	w.CompressionLevel = flate.NoCompression
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		w.WriteMessage(&Message{
+		_ = w.WriteMessage(&Message{
 			Version:  "1.1",
 			Host:     w.hostname,
 			Short:    "short message",
 			Full:     "full message",
 			TimeUnix: float64(time.Now().UnixNano()) / float64(time.Second),
 			Level:    6, // info
-			Facility: w.Facility,
+			Facility: w.facility,
 			Extra:    map[string]interface{}{"_file": "1234", "_line": "3456"},
 		})
 	}
@@ -293,7 +293,7 @@ func BenchmarkWriteDisableCompressionCompletely(b *testing.B) {
 	if err != nil {
 		b.Fatalf("NewReader: %s", err)
 	}
-	go io.Copy(ioutil.Discard, r)
+	go func() { _, _ = io.Copy(io.Discard, r) }()
 	w, err := NewUDPWriter(r.Addr())
 	if err != nil {
 		b.Fatalf("NewUDPWriter: %s", err)
@@ -301,14 +301,14 @@ func BenchmarkWriteDisableCompressionCompletely(b *testing.B) {
 	w.CompressionType = CompressNone
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		w.WriteMessage(&Message{
+		_ = w.WriteMessage(&Message{
 			Version:  "1.1",
 			Host:     w.hostname,
 			Short:    "short message",
 			Full:     "full message",
 			TimeUnix: float64(time.Now().UnixNano()) / float64(time.Second),
 			Level:    6, // info
-			Facility: w.Facility,
+			Facility: w.facility,
 			Extra:    map[string]interface{}{"_file": "1234", "_line": "3456"},
 		})
 	}
@@ -319,7 +319,7 @@ func BenchmarkWriteDisableCompressionAndPreencodeExtra(b *testing.B) {
 	if err != nil {
 		b.Fatalf("NewReader: %s", err)
 	}
-	go io.Copy(ioutil.Discard, r)
+	go func() { _, _ = io.Copy(io.Discard, r) }()
 	w, err := NewUDPWriter(r.Addr())
 	if err != nil {
 		b.Fatalf("NewUDPWriter: %s", err)
@@ -327,14 +327,14 @@ func BenchmarkWriteDisableCompressionAndPreencodeExtra(b *testing.B) {
 	w.CompressionType = CompressNone
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		w.WriteMessage(&Message{
+		_ = w.WriteMessage(&Message{
 			Version:  "1.1",
 			Host:     w.hostname,
 			Short:    "short message",
 			Full:     "full message",
 			TimeUnix: float64(time.Now().UnixNano()) / float64(time.Second),
 			Level:    6, // info
-			Facility: w.Facility,
+			Facility: w.facility,
 			RawExtra: json.RawMessage(`{"_file":"1234","_line": "3456"}`),
 		})
 	}
