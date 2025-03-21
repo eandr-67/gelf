@@ -15,14 +15,15 @@ type Writer interface {
 	Close() error
 	Write([]byte) (int, error)
 	WriteMessage(*Message) error
+	SetFacility(string)
+	GetFacility() string
 }
 
 type GelfWriter struct {
-	Writer
 	addr     string
 	conn     net.Conn
 	hostname string
-	Facility string // defaults to current process name
+	facility string // defaults to current process name
 	proto    string
 }
 
@@ -32,4 +33,12 @@ func (w *GelfWriter) Close() error {
 		return nil
 	}
 	return w.conn.Close()
+}
+
+func (w *GelfWriter) SetFacility(f string) {
+	w.facility = f
+}
+
+func (w *GelfWriter) GetFacility() string {
+	return w.facility
 }
